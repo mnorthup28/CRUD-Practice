@@ -74,6 +74,27 @@ app.delete("/sample/:id", (req, res) => {
 });
 
 // app.patch();
+app.patch("/sample/:id", (req, res) => {
+  const sampleId = Number.parseInt(req.params.id);
+  const { name } = req.body;
+  client
+    .query(`UPDATE sampletable SET name = $1 WHERE id = $2 RETURNING *`, [
+      name,
+      sampleId,
+    ])
+    .then((data) => {
+      if (data.rows[0] !== undefined) {
+        res.json(data.rows[0]);
+        res.sendStatus(200);
+      } else {
+        res.sendStatus(404); // Not Found
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500); // Internal Server Error
+    });
+});
 
 app.listen(PORT, () => {
   console.log(`Listening on ${PORT}`);
